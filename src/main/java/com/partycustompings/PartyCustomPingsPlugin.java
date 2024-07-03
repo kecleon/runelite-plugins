@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021, neilrush
+ * Copyright (c) 2024, kecleon, jackvolonte
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -59,7 +59,7 @@ public class PartyCustomPingsPlugin extends Plugin
 	}
 
 	@Provides
-	PlayerOutlineConfig provideConfig(ConfigManager configManager)
+	PartyCustomPingsConfig provideConfig(ConfigManager configManager)
 	{
 		return configManager.getConfig(PartyCustomPingsConfig.class);
 	}

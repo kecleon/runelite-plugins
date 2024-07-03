@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021, neilrush
+ * Copyright (c) 2024, kecleon, jackvolonte
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -24,12 +24,11 @@
  */
 package com.partycustompings;
 
-import java.awt.Color;
 import net.runelite.client.config.Alpha;
 import net.runelite.client.config.Config;
 import net.runelite.client.config.ConfigGroup;
 import net.runelite.client.config.ConfigItem;
-import net.runelite.client.config.Range;
+import net.runelite.client.config.Keybind;
 
 @ConfigGroup("partycustompings")
 public interface PartyCustomPingsConfig extends Config

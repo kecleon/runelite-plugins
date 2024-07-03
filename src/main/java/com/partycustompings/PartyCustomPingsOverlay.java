@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021, neilrush
+ * Copyright (c) 2024, kecleon, jackvolonte
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -32,7 +32,6 @@ import net.runelite.client.ui.overlay.Overlay;
 import net.runelite.client.ui.overlay.OverlayLayer;
 import net.runelite.client.ui.overlay.OverlayPosition;
 import net.runelite.client.ui.overlay.OverlayPriority;
-import net.runelite.client.ui.overlay.outline.ModelOutlineRenderer;
 
 public class PartyCustomPingsOverlay extends Overlay
 {
