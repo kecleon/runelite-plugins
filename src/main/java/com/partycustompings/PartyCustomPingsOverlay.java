@@ -24,35 +24,94 @@
  */
 package com.partycustompings;
 
+import lombok.extern.slf4j.Slf4j;
+import java.awt.Color;
 import java.awt.Dimension;
 import java.awt.Graphics2D;
+import java.awt.Polygon;
 import javax.inject.Inject;
 import net.runelite.api.Client;
+import net.runelite.api.Perspective;
+import net.runelite.api.Point;
+import net.runelite.api.Tile;
+import net.runelite.api.coords.LocalPoint;
 import net.runelite.client.ui.overlay.Overlay;
 import net.runelite.client.ui.overlay.OverlayLayer;
 import net.runelite.client.ui.overlay.OverlayPosition;
 import net.runelite.client.ui.overlay.OverlayPriority;
+import net.runelite.client.ui.overlay.OverlayUtil;
 
+@Slf4j
 public class PartyCustomPingsOverlay extends Overlay
 {
-
 	private final Client client;
-	private final PartyCustomPingsConfig config;
+	private final PartyCustomPingsPlugin plugin;
+
+	private final Color TEMP_TILE_COLOR = new Color(2, 217, 134);
+	private final Color OVAL_INNER_LINE_COLOR = new Color(205, 178, 128);
+	private final Color OVAL_OUTER_LINE_COLOR = new Color(37, 56, 33);
+	private final Color OVAL_FILL_COLOR = new Color(19, 45, 46, 20);
 
 	@Inject
-	public PartyCustomPingsOverlay(Client client, PartyCustomPingsConfig config)
+	public PartyCustomPingsOverlay(final Client client, final PartyCustomPingsPlugin plugin)
 	{
 		this.client = client;
-		this.config = config;
+		this.plugin = plugin;
 		setPosition(OverlayPosition.DYNAMIC);
 		setLayer(OverlayLayer.ABOVE_SCENE);
 		setPriority(OverlayPriority.HIGH);
 	}
 
 	@Override
-	public Dimension render(Graphics2D graphics)
+	public Dimension render(final Graphics2D graphics)
 	{
+		if (plugin.wheelOpened == -1)
+		{
+			return null;
+		}
+
+		log.debug("Rendering wheel at point {}", plugin.screenPoint.toString());
+
+		renderTile(graphics, plugin.tilePoint);
+		renderWheel(graphics, plugin.screenPoint);
+
 		return null;
 	}
 
+	private void renderTile(final Graphics2D graphics, final Tile tile)
+	{
+		final LocalPoint localPoint = tile.getLocalLocation();
+
+		if (localPoint == null)
+		{
+			log.debug("localpoint null");
+			return;
+		}
+
+		final Polygon poly = Perspective.getCanvasTilePoly(client, localPoint);
+
+		if (poly == null)
+		{
+			log.debug("poly null");
+			return;
+		}
+
+		log.debug("poly: {}", poly);
+		OverlayUtil.renderPolygon(graphics, poly, TEMP_TILE_COLOR);
+	}
+
+	private void renderWheel(Graphics2D graphics, Point screenPoint)
+	{
+		graphics.setColor(Color.WHITE);
+		graphics.drawString("PING", screenPoint.getX() - 10, screenPoint.getY() - 2);
+
+		graphics.setColor(OVAL_FILL_COLOR);
+		graphics.fillOval(screenPoint.getX() - 84, screenPoint.getY() - 84, 168, 168);
+
+		graphics.setColor(OVAL_INNER_LINE_COLOR);
+		graphics.drawOval(screenPoint.getX() - 42, screenPoint.getY() - 42, 84, 84);
+
+		graphics.setColor(OVAL_OUTER_LINE_COLOR);
+		graphics.drawOval(screenPoint.getX() - 84, screenPoint.getY() - 84, 168, 168);
+	}
 }

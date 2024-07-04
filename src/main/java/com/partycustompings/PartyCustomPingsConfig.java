@@ -30,7 +30,7 @@ import net.runelite.client.config.ConfigGroup;
 import net.runelite.client.config.ConfigItem;
 import net.runelite.client.config.Keybind;
 
-@ConfigGroup("partycustompings")
+@ConfigGroup(PartyCustomPingsPlugin.CONFIG_GROUP)
 public interface PartyCustomPingsConfig extends Config
 {
 	@Alpha
@@ -41,6 +41,18 @@ public interface PartyCustomPingsConfig extends Config
 		position = 0
 	)
 	default Keybind emoteWheelKey()
+	{
+		return Keybind.NOT_SET;
+	}
+
+	@Alpha
+	@ConfigItem(
+		keyName = "emoteWheelHotkey",
+		name = "Emote Wheel Hotkey",
+		description = "Key to open the emote wheel",
+		position = 0
+	)
+	default Keybind ping1()
 	{
 		return Keybind.NOT_SET;
 	}

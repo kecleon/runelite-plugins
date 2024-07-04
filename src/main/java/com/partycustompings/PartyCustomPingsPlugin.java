@@ -27,10 +27,22 @@ package com.partycustompings;
 import com.google.inject.Provides;
 import javax.inject.Inject;
 import lombok.extern.slf4j.Slf4j;
+import net.runelite.api.Client;
+import net.runelite.api.MenuEntry;
+import net.runelite.api.Point;
+import net.runelite.api.Tile;
+import net.runelite.api.events.FocusChanged;
+import net.runelite.api.events.MenuOptionClicked;
 import net.runelite.client.config.ConfigManager;
+import net.runelite.client.config.Keybind;
+import net.runelite.client.eventbus.Subscribe;
+import net.runelite.client.events.ConfigChanged;
+import net.runelite.client.input.KeyManager;
+import net.runelite.client.party.PartyService;
 import net.runelite.client.plugins.Plugin;
 import net.runelite.client.plugins.PluginDescriptor;
 import net.runelite.client.ui.overlay.OverlayManager;
+import net.runelite.client.util.HotkeyListener;
 
 @Slf4j
 @PluginDescriptor(
@@ -40,22 +52,63 @@ import net.runelite.client.ui.overlay.OverlayManager;
 )
 public class PartyCustomPingsPlugin extends Plugin
 {
+	protected static final String CONFIG_GROUP = "partycustompings";
+
+	@Inject
+	private Client client;
+
+	@Inject
+	private PartyCustomPingsConfig config;
+
+	@Inject
+	private PartyService party;
+
 	@Inject
 	private OverlayManager overlayManager;
 
 	@Inject
 	PartyCustomPingsOverlay partyCustomPingsOverlay;
 
+	@Inject
+	KeyManager keyManager;
+
+	private Keybind emoteWheelHotkey;
+
+	protected long wheelOpened = -1;
+	protected Point screenPoint = null;
+	protected Tile tilePoint = null;
+
 	@Override
 	protected void startUp()
 	{
 		overlayManager.add(partyCustomPingsOverlay);
+		updateConfig();
+		keyManager.registerKeyListener(EmoteWheelHotkeyListener);
 	}
 
 	@Override
 	protected void shutDown()
 	{
 		overlayManager.remove(partyCustomPingsOverlay);
+		keyManager.unregisterKeyListener(EmoteWheelHotkeyListener);
+	}
+
+	@Subscribe
+	public void onConfigChanged(ConfigChanged event)
+	{
+		if (!event.getGroup().equals(CONFIG_GROUP))
+		{
+			return;
+		}
+
+		updateConfig();
+	}
+
+	private void updateConfig()
+	{
+		keyManager.unregisterKeyListener(EmoteWheelHotkeyListener);
+		emoteWheelHotkey = config.emoteWheelKey();
+		keyManager.registerKeyListener(EmoteWheelHotkeyListener);
 	}
 
 	@Provides
@@ -63,4 +116,116 @@ public class PartyCustomPingsPlugin extends Plugin
 	{
 		return configManager.getConfig(PartyCustomPingsConfig.class);
 	}
+
+	private final HotkeyListener EmoteWheelHotkeyListener = new HotkeyListener(() -> this.emoteWheelHotkey)
+	{
+		@Override
+		public void hotkeyPressed()
+		{
+			//set point before time in case renderer sees wheel opened first before point
+			screenPoint = client.getMouseCanvasPosition();
+			tilePoint = client.getSelectedSceneTile();
+			wheelOpened = System.currentTimeMillis();
+			log.debug("screenPoint: {}, wheelOpened: {}", screenPoint, wheelOpened);
+
+			if (tilePoint == null)
+			{
+				log.debug("tile null");
+				return;
+			}
+
+			log.debug("tilePoint: {}", tilePoint.getWorldLocation());
+
+			boolean isOnCanvas = false;
+			for (MenuEntry menuEntry : client.getMenuEntries())
+			{
+				if (menuEntry == null)
+				{
+					continue;
+				}
+
+				if ("Walk here".equals(menuEntry.getOption()))
+				{
+					log.debug("found walk here");
+					isOnCanvas = true;
+					break;
+				}
+			}
+
+			if (!isOnCanvas)
+			{
+				log.debug("no walk here");
+				return;
+			}
+
+			calcSegments(8);
+		}
+
+		@Override
+		public void hotkeyReleased()
+		{
+			log.debug("cleared wheel");
+			wheelOpened = -1;
+			tilePoint = null;
+			screenPoint = null;
+		}
+	};
+
+	private void calcSegments(int segments)
+	{
+
+	}
+
+	@Subscribe
+	public void onFocusChanged(FocusChanged focusChanged)
+	{
+		if (!focusChanged.isFocused())
+		{
+			log.debug("lost focus");
+			EmoteWheelHotkeyListener.hotkeyReleased();
+		}
+	}
+
+	@Subscribe
+	public void onMenuOptionClicked(MenuOptionClicked event)
+	{
+		if (wheelOpened == -1 || client.isMenuOpen() || !party.isInParty())
+		{
+			log.debug("wheel {} menu {} party {}", wheelOpened, client.isMenuOpen(), party.isInParty());
+			return;
+		}
+
+		if (tilePoint == null)
+		{
+			log.debug("tile null");
+			return;
+		}
+
+		event.consume();
+		//final EmotePing tilePing = new TilePing(tilePoint.getWorldLocation());
+		//party.send(tilePing);
+	}
+
+	/*@Subscribe
+	public void onTilePing(TilePing event)
+	{
+		if (config.pings())
+		{
+			final PartyData partyData = getPartyData(event.getMemberId());
+			final Color color = partyData != null ? partyData.getColor() : Color.RED;
+			pendingTilePings.add(new PartyTilePingData(event.getPoint(), color));
+		}
+
+		if (config.sounds())
+		{
+			WorldPoint point = event.getPoint();
+
+			if (point.getPlane() != client.getPlane() || !WorldPoint.isInScene(client, point.getX(), point.getY()))
+			{
+				return;
+			}
+
+			clientThread.invoke(() -> client.playSoundEffect(SoundEffectID.SMITH_ANVIL_TINK));
+		}
+	}*/
 }
