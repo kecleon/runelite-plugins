@@ -31,6 +31,7 @@ import net.runelite.api.Client;
 import net.runelite.api.MenuEntry;
 import net.runelite.api.Point;
 import net.runelite.api.Tile;
+import net.runelite.api.events.BeforeRender;
 import net.runelite.api.events.FocusChanged;
 import net.runelite.api.events.MenuOptionClicked;
 import net.runelite.client.config.ConfigManager;
@@ -46,9 +47,9 @@ import net.runelite.client.util.HotkeyListener;
 
 @Slf4j
 @PluginDescriptor(
-	name = "Party Custom Pings",
-	description = "A plugin to share more types of pings in parties, including images.",
-	tags = {"party", "ping", "bait"}
+		name = "Party Custom Pings",
+		description = "A plugin to share more types of pings in parties, including images.",
+		tags = {"party", "ping", "bait"}
 )
 public class PartyCustomPingsPlugin extends Plugin
 {
@@ -126,15 +127,15 @@ public class PartyCustomPingsPlugin extends Plugin
 			screenPoint = client.getMouseCanvasPosition();
 			tilePoint = client.getSelectedSceneTile();
 			wheelOpened = System.currentTimeMillis();
-			log.debug("screenPoint: {}, wheelOpened: {}", screenPoint, wheelOpened);
+
 
 			if (tilePoint == null)
 			{
-				log.debug("tile null");
+
 				return;
 			}
 
-			log.debug("tilePoint: {}", tilePoint.getWorldLocation());
+
 
 			boolean isOnCanvas = false;
 			for (MenuEntry menuEntry : client.getMenuEntries())
@@ -146,7 +147,7 @@ public class PartyCustomPingsPlugin extends Plugin
 
 				if ("Walk here".equals(menuEntry.getOption()))
 				{
-					log.debug("found walk here");
+
 					isOnCanvas = true;
 					break;
 				}
@@ -154,7 +155,7 @@ public class PartyCustomPingsPlugin extends Plugin
 
 			if (!isOnCanvas)
 			{
-				log.debug("no walk here");
+
 				return;
 			}
 
@@ -164,7 +165,7 @@ public class PartyCustomPingsPlugin extends Plugin
 		@Override
 		public void hotkeyReleased()
 		{
-			log.debug("cleared wheel");
+
 			wheelOpened = -1;
 			tilePoint = null;
 			screenPoint = null;
@@ -181,27 +182,43 @@ public class PartyCustomPingsPlugin extends Plugin
 	{
 		if (!focusChanged.isFocused())
 		{
-			log.debug("lost focus");
+
 			EmoteWheelHotkeyListener.hotkeyReleased();
 		}
 	}
 
+//	@Subscribe
+//	public void onBeforeRender(BeforeRender event) {
+//		if (wheelOpened == - 1) {
+//			return;
+//		}
+//
+//		Point mousePoint = client.getMouseCanvasPosition();
+//
+//
+//	}
+
 	@Subscribe
 	public void onMenuOptionClicked(MenuOptionClicked event)
 	{
-		if (wheelOpened == -1 || client.isMenuOpen() || !party.isInParty())
+
+
+		if (wheelOpened == -1 || client.isMenuOpen() )
 		{
-			log.debug("wheel {} menu {} party {}", wheelOpened, client.isMenuOpen(), party.isInParty());
+
 			return;
 		}
 
 		if (tilePoint == null)
 		{
-			log.debug("tile null");
+
 			return;
 		}
 
-		event.consume();
+
+
+		event.consume(); //will cancel event
+
 		//final EmotePing tilePing = new TilePing(tilePoint.getWorldLocation());
 		//party.send(tilePing);
 	}

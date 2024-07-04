@@ -35,10 +35,10 @@ public interface PartyCustomPingsConfig extends Config
 {
 	@Alpha
 	@ConfigItem(
-		keyName = "emoteWheelHotkey",
-		name = "Emote Wheel Hotkey",
-		description = "Key to open the emote wheel",
-		position = 0
+			keyName = "emoteWheelHotkey",
+			name = "Emote Wheel Hotkey",
+			description = "Key to open the emote wheel",
+			position = 0
 	)
 	default Keybind emoteWheelKey()
 	{
@@ -47,10 +47,10 @@ public interface PartyCustomPingsConfig extends Config
 
 	@Alpha
 	@ConfigItem(
-		keyName = "emoteWheelHotkey",
-		name = "Emote Wheel Hotkey",
-		description = "Key to open the emote wheel",
-		position = 0
+			keyName = "emoteWheelHotkey",
+			name = "Emote Wheel Hotkey",
+			description = "Key to open the emote wheel",
+			position = 0
 	)
 	default Keybind ping1()
 	{
