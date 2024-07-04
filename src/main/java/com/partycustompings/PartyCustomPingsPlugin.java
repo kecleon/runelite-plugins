@@ -45,6 +45,8 @@ import net.runelite.client.plugins.PluginDescriptor;
 import net.runelite.client.ui.overlay.OverlayManager;
 import net.runelite.client.util.HotkeyListener;
 
+import java.io.File;
+
 @Slf4j
 @PluginDescriptor(
 		name = "Party Custom Pings",
@@ -78,6 +80,9 @@ public class PartyCustomPingsPlugin extends Plugin
 	protected long wheelOpened = -1;
 	protected Point screenPoint = null;
 	protected Tile tilePoint = null;
+
+	//image handling
+	protected long hotkeyReleased = -1;
 
 	@Override
 	protected void startUp()
@@ -127,6 +132,7 @@ public class PartyCustomPingsPlugin extends Plugin
 			screenPoint = client.getMouseCanvasPosition();
 			tilePoint = client.getSelectedSceneTile();
 			wheelOpened = System.currentTimeMillis();
+			hotkeyReleased = -1;
 
 
 			if (tilePoint == null)
@@ -165,10 +171,9 @@ public class PartyCustomPingsPlugin extends Plugin
 		@Override
 		public void hotkeyReleased()
 		{
-
+			hotkeyReleased = 1;
 			wheelOpened = -1;
 			tilePoint = null;
-			screenPoint = null;
 		}
 	};
 
@@ -180,11 +185,7 @@ public class PartyCustomPingsPlugin extends Plugin
 	@Subscribe
 	public void onFocusChanged(FocusChanged focusChanged)
 	{
-		if (!focusChanged.isFocused())
-		{
 
-			EmoteWheelHotkeyListener.hotkeyReleased();
-		}
 	}
 
 //	@Subscribe

@@ -24,22 +24,31 @@
  */
 package com.partycustompings;
 
+import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
-import java.awt.Color;
-import java.awt.Dimension;
-import java.awt.Graphics2D;
-import java.awt.Polygon;
+
+
+import java.awt.*;
+import java.awt.image.BufferedImage;
+import java.awt.image.ImageObserver;
+import java.io.File;
+import java.io.IOException;
+import javax.annotation.Nullable;
+import javax.imageio.ImageIO;
 import javax.inject.Inject;
 import net.runelite.api.Client;
 import net.runelite.api.Perspective;
 import net.runelite.api.Point;
 import net.runelite.api.Tile;
 import net.runelite.api.coords.LocalPoint;
+import net.runelite.client.RuneLite;
 import net.runelite.client.ui.overlay.Overlay;
 import net.runelite.client.ui.overlay.OverlayLayer;
 import net.runelite.client.ui.overlay.OverlayPosition;
 import net.runelite.client.ui.overlay.OverlayPriority;
 import net.runelite.client.ui.overlay.OverlayUtil;
+import net.runelite.client.util.ImageUtil;
+
 
 @Slf4j
 public class PartyCustomPingsOverlay extends Overlay
@@ -53,6 +62,9 @@ public class PartyCustomPingsOverlay extends Overlay
 	private final Color OVAL_FILL_COLOR = new Color(19, 45, 46, 20);
 	private final int WHEEL_SIZE = 168;
 
+
+	private static final File GANK_IMAGE = new File("F:\\shopifyApp\\uploadToShopify\\runelite\\runelite-client\\src\\main\\resources\\net\\runelite\\client\\plugins\\partycustompings\\gank.png");
+
 	@Inject
 	public PartyCustomPingsOverlay(final Client client, final PartyCustomPingsPlugin plugin)
 	{
@@ -63,20 +75,54 @@ public class PartyCustomPingsOverlay extends Overlay
 		setPriority(OverlayPriority.HIGH);
 	}
 
+
 	@Override
 	public Dimension render(final Graphics2D graphics)
 	{
+		if (plugin.hotkeyReleased == 1) {
+			try {
+				renderImage(graphics, plugin.screenPoint);
+			} catch (IOException ex) {
+				ex.printStackTrace();
+			}
+
+		}
 		if (plugin.wheelOpened == -1)
 		{
 			return null;
 		}
 
 
-
 		renderTile(graphics, plugin.tilePoint);
 		renderWheel(graphics, plugin.screenPoint);
 
 		return null;
+	}
+
+	private void renderImage(Graphics2D graphics, Point screenPoint) throws IOException {
+
+		plugin.hotkeyReleased = -1;
+		log.debug("bigCock" + plugin.hotkeyReleased);
+		log.debug("" + GANK_IMAGE);
+		BufferedImage chosen_image = null;
+		try {
+			synchronized (ImageIO.class)
+			{
+				chosen_image = ImageIO.read(GANK_IMAGE);
+			}
+		} catch (Exception e ) {
+			log.debug("could not load image");
+		}
+
+
+		if ( chosen_image != null ) {
+			//OverlayUtil.renderImageLocation(graphics, screenPoint, chosen_image);
+			log.debug("" + chosen_image.toString());
+
+			graphics.drawImage(chosen_image, screenPoint.getX() - chosen_image.getWidth()/2, screenPoint.getY() - chosen_image.getHeight()/2, null);
+		}
+
+
 	}
 
 	private void renderTile(final Graphics2D graphics, final Tile tile)
@@ -148,17 +194,17 @@ public class PartyCustomPingsOverlay extends Overlay
 
 		if (distanceSquared > radius * radius) {
 			if (x <= x0 && y >= y0) {
-				log.debug("BOTTOM LEFT BOTTOM LEFT");
-				return 1; // Top-left quadrant
+				//bottom left
+				return 1;
 			} else if (x > x0 && y >= y0) {
-				log.debug("BOTTOM RIGHT");
-				return 2; // Top-right quadrant
+				//bottom right
+				return 2;
 			} else if (x > x0 && y < y0) {
-				log.debug("TOP RIGHT");
-				return 3; // Bottom-right quadrant
+				//top right
+				return 3;
 			} else {
-				log.debug("TOP LEFT");
-				return 4; // Bottom-left quadrant
+				//top left
+				return 4;
 			}
 		}
 
